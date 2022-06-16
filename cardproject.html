@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전자 명함 관리</title>
+
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.css">
+    <link rel="stylesheet" href="css/cardproject.css">
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/jquery.mobile-1.4.5.js"></script>
+    <link rel="stylesheet" href="css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <script src="js/cardproject.js"></script>
+
+    <script>
+        function cardDetail(num) {
+            detailPage(num);
+        }
+
+        $(document).ready(function() {
+            // DB 연결
+            openDB();
+            createTable();
+            totalList();
+
+            // 명함 입력
+            $('#insertCardButton').click( function() {
+                insertCard();
+            });
+
+            // 명함 수정
+            $('#reviseCardButton').click(function() {
+                revisecomplete();
+                detailPage(dNum);
+                totalList();
+                $('#dialog_revise').dialog('close');
+            });
+        });
+    </script>
+</head>
+<body>
+    <!-- 시작 화면 -->
+    <div data-role="page" id="page0">
+        <div data-role="header" data-position="fixed" data-theme="b">
+            <h1>전자 명함 관리</h1>
+        </div>
+        <div data-role="content">
+            <div><img id="mainimg" src="img/businessCard.jpg" alt=""></div>
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#page1" data-transition="slidedown">전자 명함 추가</a></li>
+                <li><a href="#page2" data-transition="slidedown">전자 명함 검색</a></li>
+                <li><a href="#page3" data-transition="slidedown">전자 명함 전체 조회</a></li>
+            </ul>
+        </div>
+        <div data-role="footer" data-position="fixed" data-theme="b">
+            <h4>Business Card</h4>
+        </div>
+    </div>
+
+    <!-- 명함 정보 추가 화면 -->
+    <div data-role="page" id="page1">
+        <div data-role="header" data-position="fixed" data-theme="b">
+            <a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+            <h1>명함 정보</h1>
+            <a href="#page0" data-icon="home" data-iconpos="notext" data-transition="slideup">Home</a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#page1" data-transition="slide">입력</a></li>
+                    <li><a href="#page2" data-transition="slide">검색</a></li>
+                    <li><a href="#page3" data-transition="slide">전체 조회</a></li>
+                </ul>
+            </div>
+        </div>
+        <div data-role="content">
+            <form name="form1">
+                <h3>전자 명함 입력 <a href="#dialog_addinfo" data-iconpos="notext" data-icon="info" data-role="button" data-rel="dialog" data-inline="true"></a></h3>
+                <div class="ui-body ui-body-a gap">
+                    <label for="inputcompany">회사 및 소속:</label>
+                    <input id="inputcompany" type="text" value="" data-mini="true">
+                    <label for="inputname">이름:</label>
+                    <input id="inputname" type="text" value="" data-mini="true">
+                    <label for="inputengname">영어 이름:</label>
+                    <input id="inputengname" type="text" value="" data-mini="true">
+                    <label for="inputphone">전화 번호:</label>
+                    <input id="inputphone" type="text" value="" data-mini="true" onKeyup="this.value=this.value.replace(/[^-0-9]/g,'');">
+                    <label for="inputposition">직급 및 계급:</label>
+                    <input id="inputposition" type="text" value="" data-mini="true">
+                    <label for="inputteam">팀 이름:</label>
+                    <input id="inputteam" type="text" value="" data-mini="true">
+                    <label for="inputother">기타:</label>
+                    <input id="inputother" type="text" value="" data-mini="true">
+                </div>
+                <div class="ui-body">
+                    <fieldset class="ui-grid-a">
+                        <div class="ui-block-a">
+                            <input type="reset" value="재 입력">
+                        </div>
+                        <div class="ui-block-b">
+                            <input type="button" id="insertCardButton" value="추가">
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+        </div>
+        <div data-role="footer" data-position="fixed" data-theme="b">
+            <h4>Business Card</h4>
+        </div>
+    </div>
+
+    <!-- 명함 입력 안내 다이얼로그-->
+    <div data-role="page" id="dialog_addinfo" data-position="fixed">
+        <div data-role="header">
+            <h1>전자 명함 입력 정보</h1>
+        </div>
+        <div data-role="content">
+            <p>이름, 전화번호를 제외한 모든 항목은 빈칸이 가능합니다.</p>
+            <p>전화번호는 - 를 제외하고 입력해주세요.</p>
+            <p>기타항목에 메일을 입력하면 명함 상세보기에 메일 링크가 걸립니다.</p>
+        </div>
+    </div>
+
+
+    <!-- 명함 검색 화면 -->
+    <div data-role="page" id="page2">
+        <div data-role="header" data-position="fixed" data-theme="b">
+            <a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+            <h1>명함 검색</h1>
+            <a href="#page0" data-icon="home" data-iconpos="notext" data-transition="slideup">Home</a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#page1" data-transition="slide">입력</a></li>
+                    <li><a href="#page2" data-transition="slide">검색</a></li>
+                    <li><a href="#page3" data-transition="slide">전체 조회</a></li>
+                </ul>
+            </div>
+        </div>
+        <div data-role="content">
+            <h3>명함 검색</h3>
+            <div class="ui-body ui-body-a gap">
+                <label>검색 분류:</label>
+                <select id="selectcategory" data-native-menu="false" data-mini="true">
+                    <option value="company">회사 및 소속</option>
+                    <option value="name">이름</option>
+                    <option value="engname">영어 이름</option>
+                    <option value="phone">전화 번호</option>
+                    <option value="position">직급 및 계급</option>
+                    <option value="team">팀 이름</option>
+                    <option value="other">기타</option>
+                </select>
+                <input id="searchcontent" type="search" value="" data-mini="true">
+            </div>
+            <div class="ui-body">
+                <input onclick="cardsearch()" type="button" id="search2" value="검색">
+            </div>
+            <ul id="cardsearchlist" data-role="listview" data-inset="true"></ul>
+        </div>
+        <div data-role="footer" data-position="fixed" data-theme="b">
+            <h4>Business Card</h4>
+        </div>
+    </div>
+
+    <!-- 명함 전체 조회 화면 -->
+    <div data-role="page" id="page3">
+        <div data-role="header" data-position="fixed" data-theme="b">
+            <a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+            <h1>명함 전체 조회</h1>
+            <a href="#page0" data-icon="home" data-iconpos="notext" data-transition="slideup">Home</a>
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#page1" data-transition="slide">입력</a></li>
+                    <li><a href="#page2" data-transition="slide">검색</a></li>
+                    <li><a href="#page3" data-transition="slide">전체 조회</a></li>
+                </ul>
+            </div>
+        </div>
+        <div data-role="content">
+            <h3>전체 명함 목록</h3>
+            <ul id="cardalllist" data-role="listview" data-inset="true"></ul>
+        </div>
+        <div data-role="footer" data-position="fixed" data-theme="b">
+            <h4>Business Card</h4>
+        </div>
+    </div>
+
+    <!-- 명함 상세정보 다이얼로그 화면 -->
+    <div data-role="page" id="dialog_card" data-position="fixed">
+        <div data-role="header">
+            <h1>명함 상세 정보</h1>
+        </div>
+        <div data-role="content">
+            <table data-role="table" class="ui-responsive table-stripe">
+                <thead>
+                    <tr>
+                        <th>회사 및 소속</th>
+                        <th>이름</th>
+                        <th>영어 이름</th>
+                        <th>전화 번호</th>
+                        <th>직급 및 계급</th>
+                        <th>팀 이름</th>
+                        <th>기타</th>
+                    </tr>
+                </thead>
+                <tbody id="detailbody">
+                    <tr>
+                        <th><b id="detailcompany"></b></th>
+                        <th><b id="detailname"></b></th>
+                        <th><b id="detailengname"></b></th>
+                        <th><b id="detailphone"></b></th>
+                        <th><b id="detailposition"></b></th>
+                        <th><b id="detailteam"></b></th>
+                        <th><b id="detailother"></b></th>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            <div class="ui-grid-a">
+                <div class="ui-block-a"><a data-role="button" href="#dialog_revise" onclick="revise()" data-rel="dialog">수정</a></div>
+                <div class="ui-block-b"><a data-role="button" onclick="deletecard()">삭제</a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 명함 정보 수정 다이얼로그 화면 -->
+    <div data-role="page" id="dialog_revise" data-position="fixed">
+        <div data-role="header">
+            <h1>명함 수정</h1>
+        </div>
+        <div data-role="content">
+            <div class="ui-body ui-body-a gap">
+                <input id="revisenum" type="hidden" value="">
+                <label for="revisecompany">회사 및 소속:</label>
+                <input id="revisecompany" type="text" value="" data-mini="true">
+                <label for="revisename">이름:</label>
+                <input id="revisename" type="text" value="" data-mini="true">
+                <label for="reviseengname">영어 이름:</label>
+                <input id="reviseengname" type="text" value="" data-mini="true">
+                <label for="revisephone">전화 번호:</label>
+                <input id="revisephone" type="text" value="" data-mini="true">
+                <label for="reviseposition">직급 및 계급:</label>
+                <input id="reviseposition" type="text" value="" data-mini="true">
+                <label for="reviseteam">팀 이름:</label>
+                <input id="reviseteam" type="text" value="" data-mini="true">
+                <label for="reviseother">기타:</label>
+                <input id="reviseother" type="text" value="" data-mini="true">
+            </div>
+            <div class="ui-body">
+                <input type="button" id="reviseCardButton" href="#page3" value="수정">
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
